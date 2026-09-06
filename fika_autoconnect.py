@@ -25,9 +25,9 @@ import time
 import concurrent.futures
 from pathlib import Path
 
-# ============ 配置区（默认值；同目录 config.json 可覆盖全部） ============
-# 默认 SPT 安装根目录（含 SPT_Runtime 的目录）。找不到时自动探测常见位置。
-DEFAULT_SPT_ROOT = Path(r"D:\free games\EFT_0821")
+# ============ 配置区（默认值；同目录 config.json 可覆盖） ============
+# ⭐ 本脚本位于 <SPT根>/FikaAutoConnect/fika_autoconnect.py
+#    → SPT_ROOT = 脚本所在目录的上一级（自动推导，无需配置、无需探测）
 VLAN_ADAPTER_KEYWORD = "QIYOU_PLAY"
 
 # SPT 服务端端口
@@ -57,19 +57,14 @@ ALLOWED_SUBNETS = ("10.", "172.16.", "172.17.", "172.18.", "172.19.",
 # 运行时配置（由 load_config 填充覆盖默认值，见 apply_config）
 CFG = {}
 
-# 常见 SPT 安装位置（自动探测用，覆盖多盘多目录名）
-COMMON_SPT_ROOTS = [
-    r"D:\free games\EFT_0821",
-    r"D:\free games\EFT-new",
-    r"D:\free games\EFT",
-    r"D:\EFT",
-    r"D:\SPT",
-    r"D:\Games\SPT",
-    r"C:\Games\SPT",
-    r"C:\SPT",
-    r"E:\EFT",
-    r"E:\SPT",
-]
+
+def resolve_spt_root() -> Path:
+    """
+    SPT 根目录 = 脚本所在目录的上一级（脚本位于 <SPT根>/FikaAutoConnect/）。
+    返回 Path；若结构不符（找不到 SPT_Runtime/SPT.Launcher.exe）则仍返回推导值，
+    由后续步骤给出明确报错。
+    """
+    return Path(__file__).resolve().parent.parent
 
 
 def load_config() -> dict:
@@ -94,69 +89,13 @@ def apply_config():
     LAUNCH_LAUNCHER = bool(CFG.get("launch_launcher", LAUNCH_LAUNCHER))
     SCAN_CONCURRENCY = int(CFG.get("scan_concurrency", SCAN_CONCURRENCY))
     SCAN_TIMEOUT = float(CFG.get("scan_timeout", SCAN_TIMEOUT))
-    # spt_root 特殊处理：config 指定则用之，否则自动探测
+    # SPT_ROOT 由脚本位置推导；config 的 spt_root 仅作可选覆盖（一般不填）
+    SPT_ROOT = resolve_spt_root()
     cfg_root = CFG.get("spt_root")
     if cfg_root:
         p = Path(cfg_root)
         if (p / "SPT_Runtime" / "SPT.Launcher.exe").exists():
             SPT_ROOT = p
-            return
-    # config 无效/未指定 → 自动探测
-    SPT_ROOT = detect_spt_root() or DEFAULT_SPT_ROOT
-
-
-def detect_spt_root() -> Path:
-    """
-    自动探测 SPT 安装根目录（含 SPT_Runtime/SPT.Launcher.exe 的目录）。
-    顺序: config.json 的 spt_root > 环境变量 SPT_ROOT > COMMON_SPT_ROOTS > 全盘搜。
-    返回第一个命中的 Path；找不到返回 None。
-    """
-    # 1) config.json
-    cfg = load_config()
-    if cfg.get("spt_root"):
-        p = Path(cfg["spt_root"])
-        if (p / "SPT_Runtime" / "SPT.Launcher.exe").exists():
-            return p
-        log(f"⚠️ config.json 里的 spt_root 无效: {p}，继续探测")
-
-    # 2) 环境变量
-    env_root = os.environ.get("SPT_ROOT")
-    if env_root:
-        p = Path(env_root)
-        if (p / "SPT_Runtime" / "SPT.Launcher.exe").exists():
-            return p
-
-    # 3) 常见位置
-    for root in COMMON_SPT_ROOTS:
-        p = Path(root)
-        if (p / "SPT_Runtime" / "SPT.Launcher.exe").exists():
-            return p
-
-    # 4) 全盘有限搜索（只找 Launcher.exe 所在目录的父目录，避免太慢）
-    #    只扫 C/D/E 盘根下几层，命中即停
-    import string
-    for drive in string.ascii_uppercase:
-        d = Path(f"{drive}:\\")
-        if not d.exists():
-            continue
-        # 扫 2 层深（C:\xxx\SPT_Runtime 或 C:\xxx\yyy\SPT_Runtime）
-        try:
-            for sub in d.iterdir():
-                if not sub.is_dir():
-                    continue
-                cand = sub / "SPT_Runtime"
-                if (cand / "SPT.Launcher.exe").exists():
-                    return sub
-                # 第二层
-                try:
-                    for sub2 in sub.iterdir():
-                        if sub2.is_dir() and (sub2 / "SPT_Runtime" / "SPT.Launcher.exe").exists():
-                            return sub2
-                except Exception:
-                    pass
-        except Exception:
-            pass
-    return None
 
 
 def log(msg: str):
