@@ -1,0 +1,10 @@
+{
+  "_comment": "fika_autoconnect 配置文件。可留空让脚本自动探测；换电脑只需改 spt_root 与 server_entry_name。",
+  "spt_root": "D:\\free games\\EFT_0821",
+  "vlan_adapter_keyword": "QIYOU_PLAY",
+  "spt_port": 6969,
+  "server_entry_name": "JR",
+  "launch_launcher": true,
+  "scan_concurrency": 120,
+  "scan_timeout": 0.35
+}
