@@ -317,8 +317,11 @@ def apply_launcher(host_ip: str, log_fn=log):
     update_launcher_settings(settings_path, SERVER_ENTRY_NAME, host_ip, log_fn)
     set_preferred_server(settings_path, SERVER_ENTRY_NAME, log_fn)
 
-    if not LAUNCH_LAUNCHER:
-        log_fn("按配置不启动 Launcher（LAUNCH_LAUNCHER=False）")
+    if not LAUNCH_LAUNCHER or os.environ.get("FIKA_NO_LAUNCH") == "1":
+        if os.environ.get("FIKA_NO_LAUNCH") == "1":
+            log_fn("调试开关 FIKA_NO_LAUNCH=1：跳过启动 Launcher")
+        else:
+            log_fn("按配置不启动 Launcher（LAUNCH_LAUNCHER=False）")
         return "ok", host_ip
 
     launcher_exe = SPT_ROOT / "SPT_Runtime" / "SPT.Launcher.exe"
