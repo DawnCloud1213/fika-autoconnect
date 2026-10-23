@@ -23,7 +23,15 @@ D:\free games\EFT_0821\              ← SPT 根（含 SPT_Runtime、EscapeFromT
 ## 本机使用
 1. 开「汽游」并进入房间
 2. 双击 `FikaAutoConnect\fika_autoconnect.bat`（或桌面「SPT联机启动」快捷方式）
-3. Launcher 自动打开，直接连
+3. 窗口会自动扫描；连上就写配置并拉起 Launcher，窗口 2 秒后自动关闭
+
+## 窗口版行为（v2，2026-10-23）
+- **没连上不会退出**：窗口留着，标题显示原因（网卡没起来 / 没扫到主机 / 没 IP）
+- **`重新扫描` 按钮**：修好汽游或等主机开服后点一下即可，**不用重新双击快捷方式**（回车键同样触发）
+- **自动重试**：默认勾选，每 `auto_retry_sec`（默认 6）秒自动重扫；取消勾选可停
+- **看日志**：直接打开日志目录
+- 成功路径不变：写 `LauncherSettings.json` → 启动 `SPT.Launcher.exe` → 窗口自动关闭
+- 想要旧的无窗口行为：`python fika_autoconnect.py --cli`
 
 ## 换电脑部署（零配置）
 整个 `FikaAutoConnect` 文件夹复制到新电脑的 SPT 游戏根目录下（和 `SPT_Runtime` 平级），
@@ -38,6 +46,7 @@ D:\free games\EFT_0821\              ← SPT 根（含 SPT_Runtime、EscapeFromT
 | launch_launcher | true | 是否自动启动 Launcher |
 | scan_concurrency | 120 | 扫描并发数 |
 | scan_timeout | 0.35 | 单 IP 超时(秒) |
+| auto_retry_sec | 6 | 窗口版自动重试间隔(秒) |
 
 ## 排障
 - 日志在 `<SPT根>\SPT_Runtime\user\sptappdata\fika_autoconnect_logs\fika_autoconnect.log`
