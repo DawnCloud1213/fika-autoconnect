@@ -8,10 +8,10 @@
 脚本必须放在 **SPT 游戏根目录下新建的 `FikaAutoConnect` 文件夹**里：
 
 ```
-D:\free games\EFT_0821\              ← SPT 根（含 SPT_Runtime、EscapeFromTarkov.exe）
+<SPT根>\                          ← 游戏安装根（含 SPT_Runtime、EscapeFromTarkov.exe）
 ├── SPT_Runtime\
 ├── EscapeFromTarkov.exe
-└── FikaAutoConnect\                  ← 本工具放这里（新建文件夹）
+└── FikaAutoConnect\              ← 本工具放这里（新建文件夹）
     ├── fika_autoconnect.py
     ├── fika_autoconnect.bat
     └── config.json
